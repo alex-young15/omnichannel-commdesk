@@ -1,0 +1,1 @@
+export default function AssistantPanel(){return <aside className='w-80 border-l bg-white p-3'><div className='font-semibold text-sm mb-3'>Assistant</div><div className='text-xs text-gray-500 mb-4'>AI suggestions and connection panel.</div><div className='p-3 rounded border text-xs'>Connection: Secure, Connected</div></aside>}
