@@ -1,0 +1,1 @@
+export default function ConversationView({session}){return <div className='p-4 space-y-2'>{(session.history||[]).map((m,i)=><div key={i} className='text-sm'><span className='font-semibold'>{m.sender}:</span> {m.text}</div>)}<div className='pt-3'><input className='w-full border rounded p-2 text-sm' placeholder='Type reply...'/></div></div>}

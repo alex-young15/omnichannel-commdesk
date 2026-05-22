@@ -1,0 +1,1 @@
+export default function Badge({ children, tone='blue' }) { const map={blue:'bg-blue-100 text-blue-700',purple:'bg-purple-100 text-purple-700',orange:'bg-orange-100 text-orange-700'}; return <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${map[tone]}`}>{children}</span>; }

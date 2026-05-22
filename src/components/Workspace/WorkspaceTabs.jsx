@@ -1,0 +1,1 @@
+export default function WorkspaceTabs({activeCenterTab,setActiveCenterTab}){const tabs=['crm','conversation','transfer'];return <div className='flex gap-2 border-b p-2 bg-white'>{tabs.map(t=><button key={t} onClick={()=>setActiveCenterTab(t)} className={`px-3 py-1 text-sm rounded ${activeCenterTab===t?'bg-[#005CAB] text-white':'bg-gray-100'}`}>{t.toUpperCase()}</button>)}</div>}
