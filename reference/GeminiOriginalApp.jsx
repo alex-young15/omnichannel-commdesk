@@ -52,8 +52,12 @@ import {
   ThumbsUp,
   EyeOff,
   Ban,
-  Ticket,
-  FileEdit
+  FileEdit,
+  Folder,
+  Scissors,
+  Mic,
+  Video,
+  Clock
 } from 'lucide-react';
 
 const App = () => {
@@ -61,60 +65,27 @@ const App = () => {
   const [activeSubTab, setActiveSubTab] = useState('assistant'); 
   const [activeCenterTab, setActiveCenterTab] = useState('conversation'); 
   const [showCloseModal, setShowCloseModal] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState(5); // Set default to the Instagram post to show the 8+ comments
+  const [selectedSessionId, setSelectedSessionId] = useState(5); 
   const [isQueueVisible, setIsQueueVisible] = useState(true);
   
-  // Updated state for multi-select filtering
   const [selectedChannels, setSelectedChannels] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
-  
-  const [mainMenu, setMainMenu] = useState('inbox'); // New state for Access Records
+  const [mainMenu, setMainMenu] = useState('inbox'); 
+  const [transferTab, setTransferTab] = useState('agent'); // 'agent' | 'skill' | 'number'
 
-  // State for inline replying in posts
   const [replyingToId, setReplyingToId] = useState(null);
   const [replyText, setReplyText] = useState('');
 
   const mainTabs = [
-    { id: 'webchat', label: 'Webchat', icon: <MessageSquare size={16} /> },
-    { id: 'whatsapp', label: 'WhatsApp', icon: <MessageCircle size={16} className="text-green-400" /> },
-    { id: 'haloapps', label: 'Haloapps', icon: <Smartphone size={16} /> },
     { id: 'socialmedia', label: 'Social Media', icon: <Globe size={16} /> },
   ];
 
   const socialChannelsList = ['facebook', 'instagram', 'x', 'linkedin', 'youtube', 'tiktok', 'appstore', 'playstore'];
 
+  // Enriched mock data with strict mm:ss format handlingTimeLabel
   const [sessionsData, setSessionsData] = useState({
-    webchat: [
-      { id: 1, type: 'webchat', name: 'Dimas Abimanyu', time: '10:45 AM', title: 'Livechat', timer: '02:10', desc: 'Mengapa rekening BCA saya terblokir?', unreadCount: 0, icon: <img src="https://i.pravatar.cc/150?img=32" className="w-full h-full rounded-full object-cover" alt="Dimas" />, tabIcon: <MessageSquare size={14} className="text-[#005CAB]"/>,
-        assignmentLevel: 'conversation',
-        history: [
-          { sender: 'agent', text: 'Selamat pagi. Halo BCA, saya Vira. Dengan siapa saya bicara?', time: '10:40 AM' },
-          { sender: 'customer', text: 'dengan syarif', time: '10:41 AM' },
-          { sender: 'agent', text: 'Informasi apa yang bisa saya bantu?', time: '10:41 AM' },
-          { sender: 'customer', text: 'Mengapa rekening BCA saya terblokir?', time: '10:45 AM' },
-          { sender: 'agent', text: 'Baiklah. Saya mengerti kendala yang anda alami. Dengan senang hati kami bantu pembukaan blokir BCA ID Bapak.', time: '10:46 AM' }
-        ]
-      },
-    ],
-    whatsapp: [
-      { id: 2, type: 'whatsapp', name: 'Budi Santoso', time: '11:20 AM', title: 'WhatsApp', timer: '01:15', desc: 'Cara ganti nomor HP bagaimana?', unreadCount: 2, icon: <MessageCircle size={22} className="text-white"/>, iconBg: 'bg-[#25D366]', tabIcon: <MessageCircle size={14} className="text-[#25D366]"/>,
-        assignmentLevel: 'conversation',
-        history: [
-          { sender: 'customer', text: 'Halo, promo cc cicilan 0% masih berlaku?', time: '11:15 AM' },
-          { sender: 'customer', text: 'Cara ganti nomor HP bagaimana?', time: '11:20 AM' }
-        ]
-      },
-    ],
-    haloapps: [
-      { id: 3, type: 'haloapps', name: 'Citra', time: '09:00 AM', title: 'Haloapps', timer: '05:00', desc: 'Aplikasi tidak bisa login', unreadCount: 0, icon: <Smartphone size={22} className="text-white"/>, iconBg: 'bg-[#005CAB]', tabIcon: <Smartphone size={14} className="text-[#005CAB]"/>,
-        assignmentLevel: 'conversation',
-        history: [
-          { sender: 'customer', text: 'Aplikasi tidak bisa login, selalu force close.', time: '09:00 AM' }
-        ]
-      },
-    ],
     facebook: [
-      { id: 4, type: 'facebook', name: 'Summer Sale Post', time: '10:45 AM', title: 'Facebook', timer: '12:34', desc: 'Siti Aminah: Berapa harganya min?', unreadCount: 1, icon: <Facebook size={22} className="text-white fill-current"/>, iconBg: 'bg-[#1877F2]', tabIcon: <Facebook size={14} className="text-[#1877F2]"/>,
+      { id: 4, type: 'facebook', name: 'Summer Sale Post', time: '10:45 AM', title: 'Facebook', timer: '12:34', desc: 'Siti Aminah: Berapa harganya min?', unreadCount: 1, handlingTimeLabel: '08:35', handlingTimeMinutes: 8, isOverdue: false,
         assignmentLevel: 'post',
         postStatus: 'pending',
         postContext: {
@@ -124,12 +95,12 @@ const App = () => {
         },
         history: [
             { id: 'c1', sender: 'customer', name: 'Siti Aminah', avatar: 'https://placehold.co/100x100/8b5cf6/ffffff?text=SA', text: 'Berapa harganya min?', time: '1 hour ago', status: 'unread', isLiked: false, isHidden: false, isBlocked: false, replies: [] },
-            { id: 'c2', sender: 'customer', name: 'John Doe', avatar: 'https://placehold.co/100x100/3b82f6/ffffff?text=JD', text: 'Bisa kirim ke Papua via udara?', time: '2 hours ago', status: 'replied', agentName: 'Budi Kartika', isLiked: true, isHidden: false, isBlocked: false, replies: [ { sender: 'agent', text: 'Bisa kak! Silahkan cek ongkir saat checkout ya.', time: '1 hour ago' } ] }
+            { id: 'c2', sender: 'customer', name: 'John Doe', avatar: 'https://placehold.co/100x100/3b82f6/ffffff?text=JD', text: 'Bisa kirim ke Papua via udara?', time: '2 hours ago', status: 'replied', agentName: 'Budi Kartika', isLiked: true, isHidden: false, isBlocked: false, replies: [ { id: 'r1', sender: 'agent', text: 'Bisa kak! Silahkan cek ongkir saat checkout ya.', time: '1 hour ago' } ] }
         ]
       },
     ],
     instagram: [
-      { id: 5, type: 'instagram', name: '11.11 Promo Post (Comment)', time: '09:15 AM', title: 'Instagram Post', timer: '02:01', desc: '4 Unread Comments', unreadCount: 4, icon: <Instagram size={22} className="text-white"/>, iconBg: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]', tabIcon: <Instagram size={14} className="text-[#E1306C]"/>,
+      { id: 5, type: 'instagram', name: '11.11 Promo Post', time: '09:15 AM', title: 'Instagram Post', timer: '02:01', desc: '4 Unread Comments', unreadCount: 4, handlingTimeLabel: '45:10', handlingTimeMinutes: 45, isOverdue: false,
         assignmentLevel: 'post',
         postStatus: 'pending',
         postContext: {
@@ -139,16 +110,16 @@ const App = () => {
         },
         history: [
             { id: 'c3', sender: 'customer', name: 'Diana Prince', avatar: 'https://placehold.co/100x100/8b5cf6/ffffff?text=DP', text: 'Ini penipuan atau bukan ya? mau tanya kalau prosedur kpr bagaimana ya', time: '09:15 AM', status: 'pending_review', isLiked: false, isHidden: false, isBlocked: false, replies: [] },
-            { id: 'c4', sender: 'customer', name: 'Budi Santoso', avatar: 'https://placehold.co/100x100/3b82f6/ffffff?text=BS', text: 'Berapa cicilan per bulannya min?', time: '10:00 AM', status: 'unread', isLiked: true, isHidden: false, isBlocked: false, replies: [ { sender: 'agent', text: 'Halo kak Budi, untuk cicilan mulai dari 3 jutaan ya.', time: '10:05 AM' }, { sender: 'customer', text: 'Wah terjangkau ya, minta brosurnya dong min.', time: '10:15 AM' } ] },
+            { id: 'c4', sender: 'customer', name: 'Budi Santoso', avatar: 'https://placehold.co/100x100/3b82f6/ffffff?text=BS', text: 'Berapa cicilan per bulannya min?', time: '10:00 AM', status: 'replied', agentName: 'Budi Kartika', isLiked: true, isHidden: false, isBlocked: false, replies: [ { id: 'r2', sender: 'agent', text: 'Halo kak Budi, untuk cicilan mulai dari 3 jutaan ya.', time: '10:05 AM', status: 'replied' }, { id: 'r3', sender: 'customer', name: 'Budi Santoso', text: 'Wah terjangkau ya, minta brosurnya dong min.', time: '10:15 AM', status: 'unread' } ] },
             { id: 'c_new1', sender: 'customer', name: 'Rina Kusuma', avatar: 'https://placehold.co/100x100/ec4899/ffffff?text=RK', text: 'Lokasi detailnya di mana min?', time: '10:30 AM', status: 'unread', isLiked: false, isHidden: false, isBlocked: false, replies: [] },
-            { id: 'c_new2', sender: 'customer', name: 'Ahmad Dani', avatar: 'https://placehold.co/100x100/10b981/ffffff?text=AD', text: 'Bisa KPR bank lain nggak?', time: '10:45 AM', status: 'replied', agentName: 'Budi Kartika', isLiked: false, isHidden: false, isBlocked: false, replies: [ { sender: 'agent', text: 'Halo kak Ahmad, saat ini promo khusus KPR kami saja ya.', time: '10:50 AM' } ] },
+            { id: 'c_new2', sender: 'customer', name: 'Ahmad Dani', avatar: 'https://placehold.co/100x100/10b981/ffffff?text=AD', text: 'Bisa KPR bank lain nggak?', time: '10:45 AM', status: 'replied', agentName: 'Budi Kartika', isLiked: false, isHidden: false, isBlocked: false, replies: [ { id: 'r4', sender: 'agent', text: 'Halo kak Ahmad, saat ini promo khusus KPR kami saja ya.', time: '10:50 AM', status: 'replied' } ] },
             { id: 'c_new3', sender: 'customer', name: 'Sisca Melly', avatar: 'https://placehold.co/100x100/f59e0b/ffffff?text=SM', text: 'Bagus banget view-nya 😍', time: '11:00 AM', status: 'no_reply_needed', agentName: 'Budi Kartika', isLiked: true, isHidden: false, isBlocked: false, replies: [] },
             { id: 'c_new4', sender: 'customer', name: 'Kevin Wijaya', avatar: 'https://placehold.co/100x100/6366f1/ffffff?text=KW', text: 'Harganya mulai berapaan?', time: '11:15 AM', status: 'unread', isLiked: false, isHidden: false, isBlocked: false, replies: [] },
             { id: 'c_new5', sender: 'customer', name: 'Putri Ayu', avatar: 'https://placehold.co/100x100/ef4444/ffffff?text=PA', text: 'Ada promo DP 0% kah untuk 11.11?', time: '11:30 AM', status: 'unread', isLiked: false, isHidden: false, isBlocked: false, replies: [] },
             { id: 'c_new6', sender: 'customer', name: 'Dimas Pratama', avatar: 'https://placehold.co/100x100/0ea5e9/ffffff?text=DP', text: 'Penipuan nih paling, foto editan.', time: '11:45 AM', status: 'pending_review', isLiked: false, isHidden: true, isBlocked: false, replies: [] }
         ]
       },
-      { id: 51, type: 'instagram', name: 'Reza Rahardian (Mention)', time: '10:00 AM', title: 'Instagram Mention', timer: '01:30', desc: '@Brand tolong cek DM ya', unreadCount: 1, icon: <Instagram size={22} className="text-white"/>, iconBg: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]', tabIcon: <Instagram size={14} className="text-[#E1306C]"/>,
+      { id: 51, type: 'instagram', name: 'Reza Rahardian (Mention)', time: '10:00 AM', title: 'Instagram Mention', timer: '01:30', desc: '@Brand tolong cek DM ya', unreadCount: 1, handlingTimeLabel: '05:45', handlingTimeMinutes: 5, isOverdue: false,
         assignmentLevel: 'post',
         postStatus: 'pending',
         postContext: {
@@ -160,7 +131,7 @@ const App = () => {
             { id: 'c5', sender: 'customer', name: 'Reza Rahardian', avatar: 'https://placehold.co/100x100/10b981/ffffff?text=RR', text: '@Brand tolong cek DM ya, ada dokumen yang mau saya tanyakan.', time: '10:00 AM', status: 'unread', isLiked: false, isHidden: false, isBlocked: false, replies: [] }
         ]
       },
-      { id: 52, type: 'instagram', name: 'Siska (#BankDance)', time: '09:45 AM', title: 'Instagram Hashtag', timer: '02:00', desc: 'Keren banget promonya #BankDance', unreadCount: 0, icon: <Instagram size={22} className="text-white"/>, iconBg: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]', tabIcon: <Instagram size={14} className="text-[#E1306C]"/>,
+      { id: 52, type: 'instagram', name: 'Siska (#BankDance)', time: '09:45 AM', title: 'Instagram Hashtag', timer: '02:00', desc: 'Keren banget promonya #BankDance', unreadCount: 0, handlingTimeLabel: '00:00', handlingTimeMinutes: 0, isOverdue: false,
         assignmentLevel: 'post',
         postStatus: 'handled',
         postContext: {
@@ -174,14 +145,14 @@ const App = () => {
       }
     ],
     x: [
-      { id: 6, type: 'x', name: '@dimas_prabowo (Chat/DM)', time: '10:30 AM', title: 'X Chat', timer: '08:34', desc: 'Bisa bantu cek status transaksi?', unreadCount: 2, icon: <Twitter size={22} className="text-white fill-current"/>, iconBg: 'bg-[#1DA1F2]', tabIcon: <Twitter size={14} className="text-[#1DA1F2] fill-current"/>,
+      { id: 6, type: 'x', name: '@dimas_prabowo', time: '10:30 AM', title: 'X Chat', timer: '08:34', desc: 'Bisa bantu cek status transaksi?', unreadCount: 2, handlingTimeLabel: 'Overdue 13:02', handlingTimeMinutes: 13, isOverdue: true,
         assignmentLevel: 'conversation',
         history: [
           { sender: 'customer', text: 'Halo admin, selamat pagi.', time: '10:28 AM' },
           { sender: 'customer', text: 'Bisa bantu cek status transaksi saya? Sepertinya nyangkut.', time: '10:30 AM' }
         ]
       },
-      { id: 61, type: 'x', name: '@alex_gamer (Public Post)', time: '10:35 AM', title: 'X Post', timer: '05:00', desc: 'Mobile app down lagi ya?', unreadCount: 1, icon: <Twitter size={22} className="text-white fill-current"/>, iconBg: 'bg-[#1DA1F2]', tabIcon: <Twitter size={14} className="text-[#1DA1F2] fill-current"/>,
+      { id: 61, type: 'x', name: '@alex_gamer', time: '10:35 AM', title: 'X Post', timer: '05:00', desc: 'Mobile app down lagi ya?', unreadCount: 1, handlingTimeLabel: '08:20', handlingTimeMinutes: 8, isOverdue: false,
         assignmentLevel: 'post',
         postContext: {
             title: 'In reply to @TechNews_ID',
@@ -193,7 +164,7 @@ const App = () => {
       }
     ],
     linkedin: [
-      { id: 7, type: 'linkedin', name: 'John Doe', time: '08:30 AM', title: 'LinkedIn', timer: '00:45', desc: 'Inquiry regarding corporate account', unreadCount: 0, icon: <Linkedin size={22} className="text-white fill-current"/>, iconBg: 'bg-[#0A66C2]', tabIcon: <Linkedin size={14} className="text-[#0A66C2] fill-current"/>,
+      { id: 7, type: 'linkedin', name: 'John Doe', time: '08:30 AM', title: 'LinkedIn', timer: '00:45', desc: 'Inquiry regarding corporate account', unreadCount: 0, handlingTimeLabel: '00:45', handlingTimeMinutes: 0, isOverdue: false,
         assignmentLevel: 'conversation',
         history: [
           { sender: 'customer', text: 'Hello, I have an inquiry regarding corporate account.', time: '08:30 AM' }
@@ -201,7 +172,7 @@ const App = () => {
       },
     ],
     youtube: [
-      { id: 8, type: 'youtube', name: 'Q3 Earnings Video', time: 'Yesterday', title: 'YouTube', timer: '24:00', desc: 'User123: When will the dividends be paid out?', unreadCount: 1, icon: <Youtube size={22} className="text-white fill-current"/>, iconBg: 'bg-[#FF0000]', tabIcon: <Youtube size={14} className="text-[#FF0000] fill-current"/>,
+      { id: 8, type: 'youtube', name: 'Q3 Earnings Video', time: 'Yesterday', title: 'YouTube', timer: '24:00', desc: 'User123: When will the dividends be paid out?', unreadCount: 1, handlingTimeLabel: '1440:00', handlingTimeMinutes: 1440, isOverdue: false,
         assignmentLevel: 'post',
         postContext: {
             title: 'Q3 2025 Earnings Call',
@@ -213,36 +184,25 @@ const App = () => {
         ]
       },
     ],
-    tiktok: [
-      { id: 9, type: 'tiktok', name: 'TikTok User', time: 'Yesterday', title: 'TikTok', timer: '12:00', desc: 'Apakah ada promo kartu kredit?', unreadCount: 3, icon: <Music size={22} className="text-white"/>, iconBg: 'bg-[#000000]', tabIcon: <Music size={14} className="text-[#000000]"/>,
-        assignmentLevel: 'post',
-        postContext: {
-            title: 'Dance Challenge Promo',
-            image: '',
-            text: 'Join the #BankDance challenge and win up to 50 million!'
-        },
-        history: [
-            { id: 'c9', sender: 'customer', name: 'TikToker123', avatar: 'https://placehold.co/100x100/ec4899/ffffff?text=TK', text: 'Apakah ada promo kartu kredit?', time: 'Yesterday', status: 'unread', isLiked: false, isHidden: false, isBlocked: false, replies: [] }
-        ]
-      },
-    ],
     appstore: [
-      { id: 10, type: 'appstore', name: 'TechGuru99', time: 'Yesterday', title: 'App Store', timer: '05:12', desc: 'Great app but needs dark mode.', unreadCount: 0, icon: <Apple size={22} className="text-white fill-current"/>, iconBg: 'bg-[#000000]', tabIcon: <Apple size={14} className="text-gray-800"/>,
+      { id: 10, type: 'appstore', name: 'TechGuru99', time: 'Yesterday', title: 'App Store', timer: '05:12', desc: 'Great app but needs dark mode.', unreadCount: 1, handlingTimeLabel: 'Overdue 135:12', handlingTimeMinutes: 135, isOverdue: true,
         assignmentLevel: 'comment',
         appName: 'BCA Mobile',
         appVersion: 'v2.1.0',
         rating: 4,
+        reviewTitle: 'Solid features, blinding UI',
         history: [
           { id: 'c10', sender: 'customer', text: 'Great app but needs dark mode. It burns my eyes at night.', time: 'Yesterday, 10:00 AM', status: 'unread', isLiked: false, isHidden: false, isBlocked: false }
         ]
       },
     ],
     playstore: [
-      { id: 11, type: 'playstore', name: 'AndroidUser1', time: '2 Days Ago', title: 'Play Store', timer: '48:00', desc: 'Tolong perbaiki bug saat scan QRIS', unreadCount: 0, icon: <Play size={22} className="text-white fill-current"/>, iconBg: 'bg-[#01875F]', tabIcon: <Play size={14} className="text-[#01875F]"/>,
+      { id: 11, type: 'playstore', name: 'AndroidUser1', time: '2 Days Ago', title: 'Play Store', timer: '48:00', desc: 'Tolong perbaiki bug saat scan QRIS', unreadCount: 0, handlingTimeLabel: '00:00', handlingTimeMinutes: 0, isOverdue: false,
         assignmentLevel: 'comment',
         appName: 'BCA Mobile',
         appVersion: 'v2.1.0',
         rating: 2,
+        reviewTitle: 'QRIS Stuck terus',
         history: [
           { id: 'c11', sender: 'customer', text: 'Tolong perbaiki bug saat scan QRIS sering loading lama. Sangat mengganggu saat mau bayar di kasir.', time: '2 Days Ago', status: 'replied', agentName: 'Budi Kartika', isLiked: false, isHidden: false, isBlocked: false }
         ]
@@ -272,14 +232,12 @@ const App = () => {
     title: 'Dashboard',
     time: '',
     desc: 'Select an active session from the left queue to begin.',
-    icon: <Layout size={22} className="text-gray-400"/>,
-    iconBg: 'bg-gray-200',
     type: 'system',
     assignmentLevel: 'conversation',
     history: []
   };
 
-  const submitPostReply = (targetId, text) => {
+  const submitPostReply = (targetId, text, isSubReply = false, parentId = null) => {
     if (!text.trim()) return;
     const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
@@ -303,13 +261,27 @@ const App = () => {
                         });
                     } else {
                         updatedHistory = updatedHistory.map(c => {
-                            if (c.id === targetId) {
-                                return {
-                                    ...c,
-                                    status: 'replied',
-                                    agentName: 'Budi Kartika',
-                                    replies: [...(c.replies || []), { sender: 'agent', text: text, time: now }]
-                                };
+                            if (c.id === (isSubReply ? parentId : targetId)) {
+                                let newReplies = [...(c.replies || [])];
+                                
+                                if (isSubReply) {
+                                    newReplies = newReplies.map(r => 
+                                        r.id === targetId ? { ...r, status: 'replied', agentName: 'Budi Kartika' } : r
+                                    );
+                                } else {
+                                    c.status = 'replied';
+                                    c.agentName = 'Budi Kartika';
+                                }
+
+                                newReplies.push({ 
+                                    id: `r-${Date.now()}`, 
+                                    sender: 'agent', 
+                                    text: text, 
+                                    time: now, 
+                                    status: 'replied' 
+                                });
+
+                                return { ...c, replies: newReplies };
                             }
                             return c;
                         });
@@ -325,7 +297,7 @@ const App = () => {
     setReplyText('');
   };
 
-  const renderInlineComposer = (targetId) => {
+  const renderInlineComposer = (targetId, isSubReply = false, parentId = null) => {
     if (replyingToId !== targetId) return null;
     return (
         <div className="mt-3 bg-white p-3 rounded-lg border border-blue-200 shadow-sm animate-in fade-in zoom-in duration-200">
@@ -340,22 +312,22 @@ const App = () => {
             <div className="flex justify-end gap-2">
                 <button 
                     onClick={() => { setReplyingToId(null); setReplyText(''); }} 
-                    className="px-3 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
+                    className="px-4 py-1.5 text-xs font-bold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
                 >
                     Cancel
                 </button>
                 <button 
-                    onClick={() => submitPostReply(targetId, replyText)}
-                    className="px-4 py-1.5 bg-[#005CAB] text-white text-xs font-bold rounded-md hover:bg-blue-700 flex items-center gap-1 transition-colors"
+                    onClick={() => submitPostReply(targetId, replyText, isSubReply, parentId)}
+                    className="px-5 py-1.5 bg-[#005CAB] text-white text-xs font-bold rounded-md hover:bg-blue-700 flex items-center gap-1.5 transition-colors shadow-sm"
                 >
-                    <Send size={12} /> Post Reply
+                    <Send size={14} /> Send Reply
                 </button>
             </div>
         </div>
     );
   };
 
-  const handleCommentAction = (sessionId, commentId, actionType) => {
+  const handleCommentAction = (sessionId, commentId, actionType, isSubReply = false, parentId = null) => {
     setSessionsData(prev => {
       const newData = { ...prev };
       Object.keys(newData).forEach(channel => {
@@ -364,13 +336,25 @@ const App = () => {
             return {
               ...session,
               history: session.history.map(comment => {
-                if (comment.id === commentId) {
-                  // Handle Specific Toggles
+                if (isSubReply && comment.id === parentId) {
+                   return {
+                       ...comment,
+                       replies: comment.replies?.map(r => {
+                           if (r.id === commentId) {
+                               if (actionType === 'toggle_like') return { ...r, isLiked: !r.isLiked };
+                               if (actionType === 'hide') return { ...r, isHidden: true, status: 'no_reply_needed', agentName: 'Budi Kartika' };
+                               if (actionType === 'block') return { ...r, isBlocked: true, status: 'no_reply_needed', agentName: 'Budi Kartika' };
+                               if (['pending_review', 'no_reply_needed', 'replied', 'unread'].includes(actionType)) {
+                                   return { ...r, status: actionType, agentName: (actionType === 'replied' || actionType === 'no_reply_needed') ? 'Budi Kartika' : r.agentName };
+                               }
+                           }
+                           return r;
+                       })
+                   };
+                } else if (!isSubReply && comment.id === commentId) {
                   if (actionType === 'toggle_like') return { ...comment, isLiked: !comment.isLiked };
                   if (actionType === 'hide') return { ...comment, isHidden: true, status: 'no_reply_needed', agentName: 'Budi Kartika' };
                   if (actionType === 'block') return { ...comment, isBlocked: true, status: 'no_reply_needed', agentName: 'Budi Kartika' };
-                  
-                  // Handle Primary Status Updates
                   if (['pending_review', 'no_reply_needed', 'replied', 'unread'].includes(actionType)) {
                     return { 
                       ...comment, 
@@ -396,16 +380,16 @@ const App = () => {
       Object.keys(newData).forEach(channel => {
         newData[channel] = newData[channel].map(session => {
           if (session.id === sessionId) {
-            // Auto-mark any remaining unread as no_reply_needed
-            const updatedHistory = session.history?.map(comment => 
-                comment.status === 'unread' ? { ...comment, status: 'no_reply_needed', agentName: 'Budi Kartika' } : comment
-            );
+            const updatedHistory = session.history?.map(comment => {
+                let updatedReplies = comment.replies?.map(r => r.status === 'unread' ? { ...r, status: 'no_reply_needed', agentName: 'Budi Kartika' } : r);
+                return comment.status === 'unread' ? { ...comment, status: 'no_reply_needed', agentName: 'Budi Kartika', replies: updatedReplies } : { ...comment, replies: updatedReplies };
+            });
             return { 
                 ...session, 
                 sessionStatus: 'handled', 
                 postStatus: 'handled', 
                 history: updatedHistory,
-                unreadCount: 0 // Explicitly set unread count to 0 when completed
+                unreadCount: 0 
             };
           }
           return session;
@@ -414,7 +398,6 @@ const App = () => {
       return newData;
     });
     
-    // Clear selection so the UI naturally shifts to the next unhandled ticket
     if (mainMenu === 'inbox') {
         setSelectedSessionId(null);
     }
@@ -462,12 +445,10 @@ const App = () => {
                         setSelectedSessionId(item.id);
                         setActiveCenterTab('conversation');
                       }}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-white cursor-pointer transition-all ${item.iconBg || 'bg-gray-400'} ${isActive ? 'ring-2 ring-offset-2 ring-[#005CAB]' : 'hover:scale-105'} ${isHandled && !isActive && mainMenu !== 'access_records' ? 'opacity-40 grayscale' : 'opacity-80 hover:opacity-100'}`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold cursor-pointer transition-all bg-[#005CAB] ${isActive ? 'ring-2 ring-offset-2 ring-[#005CAB]' : 'hover:scale-105'} ${isHandled && !isActive && mainMenu !== 'access_records' ? 'opacity-40 grayscale' : 'opacity-80 hover:opacity-100'}`}
                       title={item.name}
                     >
-                      <div className="w-full h-full flex items-center justify-center rounded-full overflow-hidden">
-                        {item.icon}
-                      </div>
+                      {item.name.charAt(0).toUpperCase()}
                     </div>
                     {item.unreadCount > 0 && !isHandled && (
                       <div className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center z-10 border border-white pointer-events-none shadow-sm">
@@ -484,7 +465,7 @@ const App = () => {
     }
 
     return (
-      <div className="w-72 border-r border-gray-200 flex flex-col bg-white flex-shrink-0 transition-all">
+      <div className="w-[300px] border-r border-gray-200 flex flex-col bg-white flex-shrink-0 transition-all">
         <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <span className="text-sm font-bold text-gray-800">{title}</span>
           <div className="flex items-center space-x-3">
@@ -521,12 +502,14 @@ const App = () => {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto">
+        {/* Updated List - 5 Fields Only */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
           {items.length === 0 ? (
             <div className="p-6 text-center text-xs text-gray-400">No active sessions in this filter.</div>
           ) : items.map((item) => {
             const isActive = item.id === selectedSessionId;
             const isHandled = item.sessionStatus === 'handled' || item.postStatus === 'handled';
+            
             return (
               <div 
                 key={item.id} 
@@ -534,31 +517,32 @@ const App = () => {
                   setSelectedSessionId(item.id);
                   setActiveCenterTab('conversation');
                 }}
-                className={`flex items-center px-4 py-4 cursor-pointer border-b border-gray-100 transition-colors ${
-                  isActive ? 'bg-[#EAF5FF]' : (isHandled && mainMenu !== 'access_records' ? 'bg-gray-50 opacity-60 grayscale-[50%]' : 'bg-white hover:bg-gray-50')
+                className={`flex flex-col px-4 py-3.5 cursor-pointer border-b border-gray-100 transition-colors ${
+                  isActive ? 'bg-[#EAF5FF] ring-inset ring-1 ring-blue-200' : (isHandled && mainMenu !== 'access_records' ? 'bg-gray-50 opacity-60 grayscale-[50%]' : 'bg-white hover:bg-gray-50')
                 }`}
               >
-                <div className={`w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-white ${item.iconBg || 'bg-gray-400'} mr-3 overflow-hidden`}>
-                  {item.icon}
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center space-x-2 truncate pr-2">
-                        <span className="text-[15px] text-gray-700 truncate font-medium">{item.name}</span>
-                        {item.assignmentLevel === 'conversation' && <span className="bg-blue-100 text-blue-700 text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider flex-shrink-0">Chat</span>}
-                        {item.assignmentLevel === 'post' && <span className="bg-purple-100 text-purple-700 text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider flex-shrink-0">Post</span>}
-                        {item.assignmentLevel === 'comment' && <span className="bg-orange-100 text-orange-700 text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider flex-shrink-0">Review</span>}
+                {/* Line 1: Name, Type, Handling Time */}
+                <div className="flex justify-between items-start mb-1">
+                    <div className="flex items-center space-x-2 truncate">
+                        <span className="font-bold text-gray-900 truncate text-[13px]">{item.name}</span>
+                        <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded flex-shrink-0 ${item.assignmentLevel === 'conversation' ? 'bg-blue-100 text-blue-700' : item.assignmentLevel === 'post' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
+                            {item.assignmentLevel === 'conversation' ? 'CHAT' : item.assignmentLevel === 'post' ? 'POST' : 'REVIEW'}
+                        </span>
                     </div>
-                    <span className="text-gray-400 text-[13px] flex-shrink-0 ml-2">{isActive ? 'Now' : item.time}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500 text-[12px] truncate pr-2">{item.desc}</span>
+                    <span className={`text-[11px] font-bold whitespace-nowrap ml-2 ${item.isOverdue ? 'text-red-600' : 'text-gray-500'}`}>
+                        {item.handlingTimeLabel}
+                    </span>
+                </div>
+                {/* Line 2: Last Message & Unread */}
+                <div className="flex justify-between items-center mt-0.5">
+                    <span className="text-gray-500 text-[11px] truncate pr-3 flex-1">
+                        {item.desc || (item.history && item.history.length > 0 ? item.history[item.history.length - 1].text : 'No messages')}
+                    </span>
                     {item.unreadCount > 0 && !isHandled && (
-                      <div className="bg-red-600 text-white text-[11px] font-bold h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="bg-red-600 text-white text-[10px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                         {item.unreadCount}
                       </div>
                     )}
-                  </div>
                 </div>
               </div>
             );
@@ -571,19 +555,19 @@ const App = () => {
   return (
     <div className="flex flex-col h-screen bg-[#F0F2F5] font-sans text-slate-700 overflow-hidden">
       {/* Top Navbar */}
-      <header className="bg-[#005CAB] h-14 flex items-center justify-between px-4 text-white shadow-md z-10">
-        <div className="flex items-center space-x-6 w-full">
-          <div className="flex space-x-1 h-14 items-end overflow-x-auto no-scrollbar w-full pb-1">
+      <header className="bg-[#005CAB] h-14 flex items-center px-4 text-white shadow-md z-20 flex-shrink-0">
+        <div className="flex items-center h-full w-full">
+          <div className="flex space-x-1 h-full overflow-x-auto no-scrollbar w-full">
             <button 
               onClick={() => {
                 setActiveTab('home');
                 setSelectedSessionId(null);
                 setMainMenu('inbox');
               }}
-              className={`px-4 py-2 text-sm flex items-center space-x-1 whitespace-nowrap mb-[4px] border-b-4 transition-colors ${
+              className={`h-full px-4 text-sm flex items-center space-x-1 whitespace-nowrap border-b-4 transition-colors ${
                 activeTab === 'home' && mainMenu === 'inbox'
-                ? 'border-white font-semibold' 
-                : 'border-transparent opacity-80 hover:opacity-100 hover:border-white/50'
+                ? 'border-white font-semibold bg-white/10' 
+                : 'border-transparent opacity-80 hover:opacity-100 hover:bg-white/5 hover:border-white/50'
               }`}
             >
               <Layout size={16} />
@@ -591,7 +575,6 @@ const App = () => {
             </button>
 
             {mainTabs.map(tab => {
-              // Calculate unread count based on grouped channels
               let unreadCount = 0;
               if (tab.id === 'socialmedia') {
                 unreadCount = socialChannelsList.reduce((acc, curr) => acc + (sessionsData[curr] || []).reduce((a, c) => a + c.unreadCount, 0), 0);
@@ -606,7 +589,7 @@ const App = () => {
                   key={tab.id}
                   onClick={() => {
                     setActiveTab(tab.id);
-                    setMainMenu('inbox'); // Return to inbox mode on channel switch
+                    setMainMenu('inbox'); 
                     if (tab.id === 'socialmedia') {
                       setSelectedChannels([]);
                       setSelectedTypes([]);
@@ -617,10 +600,10 @@ const App = () => {
                       setSelectedSessionId(firstAvail ? firstAvail.id : null);
                     }
                   }}
-                  className={`px-4 py-2 text-sm flex items-center space-x-1 whitespace-nowrap mb-[4px] border-b-4 transition-colors ${
+                  className={`h-full px-4 text-sm flex items-center space-x-1 whitespace-nowrap border-b-4 transition-colors ${
                     isActive 
-                    ? 'border-white font-semibold' 
-                    : 'border-transparent opacity-80 hover:opacity-100 hover:border-white/50'
+                    ? 'border-white font-semibold bg-white/10' 
+                    : 'border-transparent opacity-80 hover:opacity-100 hover:bg-white/5 hover:border-white/50'
                   }`}
                 >
                   {tab.icon}
@@ -636,15 +619,15 @@ const App = () => {
 
             {/* Dynamic Access Records Tab */}
             {mainMenu === 'access_records' && (
-              <div className="flex items-center px-4 py-2 text-sm space-x-2 whitespace-nowrap mb-[4px] border-b-4 transition-colors border-white font-semibold bg-white/20 rounded-t-md ml-2 cursor-default">
+              <div className="flex items-center h-full px-4 text-sm space-x-2 whitespace-nowrap border-b-4 transition-colors border-white font-semibold bg-white/20 ml-2 cursor-default">
                 <History size={16} />
                 <span>Access Records</span>
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    setMainMenu('inbox'); // Closes the tab and returns to the inbox
+                    setMainMenu('inbox'); 
                   }} 
-                  className="hover:bg-black/20 p-0.5 rounded-full transition-colors ml-1"
+                  className="hover:bg-black/20 p-1 rounded-full transition-colors ml-1 flex items-center justify-center"
                 >
                   <X size={14} />
                 </button>
@@ -655,10 +638,10 @@ const App = () => {
       </header>
 
       {/* Main Container */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar">
         
         {/* 1. Left Sidebar (Narrow Icons) */}
-        <aside className="w-14 bg-white border-r border-gray-200 flex flex-col items-center py-4 space-y-6 shadow-sm z-10">
+        <aside className="w-14 bg-white border-r border-gray-200 flex flex-col items-center py-4 space-y-6 shadow-sm z-10 flex-shrink-0">
           <Layout className="text-gray-400 hover:text-[#005CAB] cursor-pointer" size={20} />
           <div onClick={() => setMainMenu('inbox')} className="relative cursor-pointer group" title="Inbox">
              <MessageSquare className={`${mainMenu === 'inbox' ? 'text-[#005CAB]' : 'text-gray-400 group-hover:text-[#005CAB]'}`} size={20} />
@@ -676,7 +659,7 @@ const App = () => {
         {renderSidebar(mainMenu === 'access_records' ? 'Access Records' : (activeTab === 'socialmedia' ? 'Social Media Inbox' : 'Sessions'), currentSessionsList)}
 
         {/* 3. Center Panel: Main Workspace */}
-        <main className="flex-1 flex flex-col bg-[#F0F2F5] overflow-hidden border-r border-gray-200">
+        <main className="flex-1 flex flex-col bg-[#F0F2F5] overflow-hidden border-r border-gray-200 min-w-[500px]">
           
           {/* Customer Session Header Tabs */}
           <div className="bg-gray-50 border-b border-gray-200 px-4 pt-3 flex items-center space-x-1 overflow-x-auto no-scrollbar flex-shrink-0">
@@ -734,7 +717,7 @@ const App = () => {
               </div>
               
               {/* Main CRM Content */}
-              <div className="flex-1 p-8 overflow-y-auto bg-white space-y-8">
+              <div className="flex-1 p-8 overflow-y-auto bg-white space-y-8 custom-scrollbar">
                 {/* CRM Header */}
                 <div className="flex items-center gap-4 border-b border-gray-200 pb-6">
                   <div className="w-16 h-16 bg-gray-100 border border-gray-300 rounded shadow-sm flex items-center justify-center">
@@ -876,23 +859,230 @@ const App = () => {
               </div>
             </div>
           ) : activeCenterTab === 'transfer' ? (
-            <div className="flex-1 flex flex-col items-center justify-center bg-white p-6 space-y-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-[#005CAB] mb-2">
-                <ArrowRightLeft size={32} />
-              </div>
-              <h2 className="text-lg font-bold text-gray-700">Transfer Session</h2>
-              <p className="text-sm text-gray-500 max-w-md text-center mb-6">Select a department or specific agent to transfer the active session with <strong>{activeSession?.name}</strong>.</p>
-              
-              <div className="flex space-x-4 w-full max-w-md">
-                <button className="flex-1 bg-white border border-gray-200 p-4 rounded-xl shadow-sm hover:border-blue-400 hover:shadow-md transition-all flex flex-col items-center justify-center space-y-2 group">
-                  <User size={24} className="text-gray-400 group-hover:text-blue-500" />
-                  <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600">Specific Agent</span>
-                </button>
-                <button className="flex-1 bg-white border border-gray-200 p-4 rounded-xl shadow-sm hover:border-blue-400 hover:shadow-md transition-all flex flex-col items-center justify-center space-y-2 group">
-                  <Layout size={24} className="text-gray-400 group-hover:text-blue-500" />
-                  <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600">Department Queue</span>
-                </button>
-              </div>
+            <div className="flex-1 flex flex-col bg-gray-50 p-6 space-y-4">
+                <div className="max-w-5xl mx-auto w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    {/* Transfer Tabs */}
+                    <div className="flex border-b border-gray-200 px-6 pt-4 space-x-6 bg-gray-50/50">
+                        <button 
+                            onClick={() => setTransferTab('agent')} 
+                            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${transferTab === 'agent' ? 'border-[#005CAB] text-[#005CAB]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        >
+                            Transfer Agent
+                        </button>
+                        <button 
+                            onClick={() => setTransferTab('skill')} 
+                            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${transferTab === 'skill' ? 'border-[#005CAB] text-[#005CAB]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        >
+                            Transfer Skill
+                        </button>
+                        <button 
+                            onClick={() => setTransferTab('number')} 
+                            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${transferTab === 'number' ? 'border-[#005CAB] text-[#005CAB]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        >
+                            Transfer Number
+                        </button>
+                    </div>
+
+                    <div className="p-6">
+                        {transferTab === 'agent' && (
+                            <>
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex gap-2 flex-1 max-w-md">
+                                        <div className="relative flex-1">
+                                            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                            <input type="text" placeholder="Search name or employee ID" className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#005CAB] focus:ring-1 focus:ring-[#005CAB]" />
+                                        </div>
+                                        <button className="bg-[#2563eb] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700 transition flex items-center gap-1.5"><Search size={16}/> Search</button>
+                                    </div>
+                                    <span className="text-sm text-gray-500 font-medium">6 agents</span>
+                                </div>
+                                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                    <table className="w-full text-left text-sm text-gray-700">
+                                        <thead className="bg-gray-50 border-b border-gray-200 text-gray-600 font-semibold text-xs">
+                                            <tr>
+                                                <th className="px-4 py-3"></th>
+                                                <th className="px-4 py-3">Employee ID</th>
+                                                <th className="px-4 py-3">Department</th>
+                                                <th className="px-4 py-3">Name</th>
+                                                <th className="px-4 py-3">Extension</th>
+                                                <th className="px-4 py-3">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3 text-center"><span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">SPV</span></td>
+                                                <td className="px-4 py-3 font-mono text-xs">AICC1024</td>
+                                                <td className="px-4 py-3">Priority Banking</td>
+                                                <td className="px-4 py-3 font-medium">Siti Rahmawati</td>
+                                                <td className="px-4 py-3">81024</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex gap-2">
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Consult</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Conference</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3 text-center"><span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">TL</span></td>
+                                                <td className="px-4 py-3 font-mono text-xs">AICC1088</td>
+                                                <td className="px-4 py-3">Card Service</td>
+                                                <td className="px-4 py-3 font-medium">Rangga Aditya</td>
+                                                <td className="px-4 py-3">81088</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex gap-2">
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Consult</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Conference</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3"></td>
+                                                <td className="px-4 py-3 font-mono text-xs">AICC1142</td>
+                                                <td className="px-4 py-3">Loan Service</td>
+                                                <td className="px-4 py-3 font-medium">Maya Anggraini</td>
+                                                <td className="px-4 py-3">81142</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex gap-2">
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Consult</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Conference</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3"></td>
+                                                <td className="px-4 py-3 font-mono text-xs">AICC1167</td>
+                                                <td className="px-4 py-3">Digital Banking</td>
+                                                <td className="px-4 py-3 font-medium">Arif Prasetyo</td>
+                                                <td className="px-4 py-3">81167</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex gap-2">
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Consult</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Conference</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3"></td>
+                                                <td className="px-4 py-3 font-mono text-xs">AICC1205</td>
+                                                <td className="px-4 py-3">Credit Card</td>
+                                                <td className="px-4 py-3 font-medium">Nadia Putri</td>
+                                                <td className="px-4 py-3">81205</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex gap-2">
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Consult</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Conference</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3"></td>
+                                                <td className="px-4 py-3 font-mono text-xs">AICC1244</td>
+                                                <td className="px-4 py-3">Branch Support</td>
+                                                <td className="px-4 py-3 font-medium">Bambang Wijaya</td>
+                                                <td className="px-4 py-3">81244</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex gap-2">
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Consult</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                        <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Conference</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-end items-center gap-4 text-sm text-gray-500">
+                                        <div className="flex items-center gap-1">
+                                            <button className="p-1 hover:text-gray-800 disabled:opacity-50"><ChevronLeft size={16}/></button>
+                                            <span className="px-2 py-1 bg-white border border-blue-500 text-blue-600 rounded text-xs font-bold shadow-sm">1</span>
+                                            <button className="p-1 hover:text-gray-800"><ChevronRight size={16}/></button>
+                                        </div>
+                                        <select className="border border-gray-300 rounded text-xs py-1 px-2 focus:outline-none focus:border-blue-500">
+                                            <option>10 / page</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                        
+                        {transferTab === 'skill' && (
+                            <>
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex gap-2 flex-1 max-w-md">
+                                        <div className="relative flex-1">
+                                            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                            <input type="text" placeholder="Search skill name" className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb]" />
+                                        </div>
+                                        <button className="bg-[#2563eb] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700 transition flex items-center gap-1.5"><Search size={16}/> Search</button>
+                                    </div>
+                                    <span className="text-sm text-gray-500 font-medium">5 skills</span>
+                                </div>
+                                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                    <table className="w-full text-left text-sm text-gray-700">
+                                        <thead className="bg-gray-50 border-b border-gray-200 text-gray-600 font-semibold text-xs">
+                                            <tr>
+                                                <th className="px-4 py-3">Skill ID</th>
+                                                <th className="px-4 py-3">Skill Name</th>
+                                                <th className="px-4 py-3">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3 font-mono text-xs">SK1001</td>
+                                                <td className="px-4 py-3 font-medium">Credit Card</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="px-4 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3 font-mono text-xs">SK1002</td>
+                                                <td className="px-4 py-3 font-medium">Banking Service</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="px-4 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3 font-mono text-xs">SK1003</td>
+                                                <td className="px-4 py-3 font-medium">Loan</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="px-4 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3 font-mono text-xs">SK1004</td>
+                                                <td className="px-4 py-3 font-medium">Priority Customer</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="px-4 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-4 py-3 font-mono text-xs">SK1005</td>
+                                                <td className="px-4 py-3 font-medium">Debit Card</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="px-4 py-1.5 border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">Transfer</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-end items-center gap-4 text-sm text-gray-500">
+                                        <div className="flex items-center gap-1">
+                                            <button className="p-1 hover:text-gray-800 disabled:opacity-50"><ChevronLeft size={16}/></button>
+                                            <span className="px-2 py-1 bg-white border border-blue-500 text-blue-600 rounded text-xs font-bold shadow-sm">1</span>
+                                            <button className="p-1 hover:text-gray-800"><ChevronRight size={16}/></button>
+                                        </div>
+                                        <select className="border border-gray-300 rounded text-xs py-1 px-2 focus:outline-none focus:border-blue-500">
+                                            <option>10 / page</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
             </div>
           ) : currentSessionsList.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center bg-white text-gray-500 p-6">
@@ -934,7 +1124,7 @@ const App = () => {
                   </div>
               </div>
 
-              <div className="flex-1 p-6 overflow-y-auto bg-white space-y-6">
+              <div className="flex-1 p-6 overflow-y-auto bg-white space-y-6 custom-scrollbar">
                 <div className="flex justify-center">
                   <span className="text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full uppercase tracking-wider">Today</span>
                 </div>
@@ -964,26 +1154,35 @@ const App = () => {
                 })}
               </div>
 
-              {/* Chat Input */}
-              <div className="p-4 border-t border-gray-100 bg-white flex-shrink-0">
-                <div className="flex items-center space-x-4 mb-3 text-gray-400">
-                  <Smile size={18} className="cursor-pointer hover:text-[#005CAB]" />
-                  <Paperclip size={18} className="cursor-pointer hover:text-[#005CAB]" />
-                  <Layout size={18} className="cursor-pointer hover:text-[#005CAB]" />
-                  <History size={18} className="cursor-pointer hover:text-[#005CAB]" />
+              {/* Chat Input (Based on Figure 3) */}
+              <div className="bg-white border-t border-gray-200 flex-shrink-0 flex flex-col">
+                {/* Toolbar */}
+                <div className="flex items-center justify-between px-4 py-2 bg-gray-50/50 border-b border-gray-100">
+                    <div className="flex items-center space-x-4 text-gray-500">
+                      <button className="hover:text-[#005CAB] transition-colors"><Smile size={20} /></button>
+                      <button className="hover:text-[#005CAB] transition-colors"><ImageIcon size={20} /></button>
+                      <button className="hover:text-[#005CAB] transition-colors"><Folder size={20} /></button>
+                      <button className="hover:text-[#005CAB] transition-colors"><Scissors size={20} /></button>
+                      <button className="hover:text-[#005CAB] transition-colors"><Mic size={20} /></button>
+                      <button className="hover:text-[#005CAB] transition-colors"><Video size={20} /></button>
+                    </div>
+                    {/* Message Record Button */}
+                    <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 bg-white border border-gray-300 px-3 py-1.5 rounded shadow-sm transition-colors">
+                        <Clock size={14} /> Message record
+                    </button>
                 </div>
-                <div className="flex space-x-2 mb-3">
-                  <input 
-                    type="text" 
-                    placeholder="Write a message..." 
-                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#005CAB]"
-                  />
-                </div>
-                <div className="flex justify-end items-center">
-                  <button className="bg-[#005CAB] text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm flex items-center space-x-2 transition-colors">
-                    <Send size={16} />
-                    <span>Send</span>
-                  </button>
+                {/* Input Area */}
+                <div className="p-4 flex flex-col">
+                    <textarea 
+                        className="w-full text-sm text-gray-800 placeholder-gray-400 focus:outline-none resize-none bg-transparent"
+                        placeholder="I'm checking for you, please wait..."
+                        rows="3"
+                    ></textarea>
+                    <div className="flex justify-end mt-2">
+                        <button className="bg-[#4285F4] text-white px-8 py-2 rounded shadow hover:bg-blue-600 font-medium text-sm transition-colors">
+                            send
+                        </button>
+                    </div>
                 </div>
               </div>
             </div>
@@ -1053,22 +1252,31 @@ const App = () => {
 
               {/* Feed of Comments */}
               <div className="flex-1 flex flex-col bg-white min-h-0">
-                <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
-                  {activeSession.history?.map((comment, idx) => (
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth custom-scrollbar">
+                  {activeSession.history?.map((comment, idx) => {
+                    const isCommentUnread = comment.status === 'unread';
+                    const unreadChildrenCount = comment.replies?.filter(r => r.status === 'unread').length || 0;
+
+                    return (
                     <div 
                         key={comment.id || idx} 
                         data-status={comment.status || 'read'}
-                        className={`mb-2 pb-5 border-b border-gray-100 last:border-0 rounded-xl p-3 transition-colors ${comment.status === 'unread' ? 'bg-blue-50/40 ring-1 ring-blue-100' : ''}`}
+                        className={`mb-2 pb-5 border-b border-gray-100 last:border-0 rounded-xl p-3 transition-colors ${isCommentUnread ? 'bg-blue-50/40 ring-1 ring-blue-100 shadow-sm' : ''}`}
                     >
                         <div className="flex items-start">
                             <img src={comment.avatar || "https://placehold.co/100x100/8b5cf6/ffffff?text=C"} className="w-9 h-9 rounded-full mr-3 mt-0.5 object-cover ring-2 ring-white shadow-sm" alt="User" />
                             <div className="flex-1">
                                 <div className="flex items-center justify-between mb-1.5">
-                                    <span className="font-bold text-sm text-gray-900">{comment.name}</span>
-                                    <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => comment.status !== 'unread' && handleCommentAction(activeSession.id, comment.id, 'unread')} title="Click to revert to Unread">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-bold text-sm text-gray-900">{comment.name}</span>
+                                        {!isCommentUnread && unreadChildrenCount > 0 && (
+                                            <span className="text-[10px] text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full font-bold">{unreadChildrenCount} unread replies</span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => !isCommentUnread && handleCommentAction(activeSession.id, comment.id, 'unread')} title="Click to revert to Unread">
                                         {comment.isHidden && <span className="flex items-center gap-1 text-[10px] text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full font-bold border border-gray-300"><EyeOff size={10}/> Hidden</span>}
                                         {comment.isBlocked && <span className="flex items-center gap-1 text-[10px] text-red-700 bg-red-100 px-2 py-0.5 rounded-full font-bold border border-red-200"><Ban size={10}/> Blocked</span>}
-                                        {comment.status === 'unread' && <span className="flex items-center gap-1.5 text-[10px] text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full font-bold border border-blue-200 shadow-sm"><span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span> Unread</span>}
+                                        {isCommentUnread && <span className="flex items-center gap-1.5 text-[10px] text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full font-bold border border-blue-200 shadow-sm"><span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span> Unread</span>}
                                         {comment.status === 'replied' && <span className="flex items-center gap-1 text-[10px] text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full font-bold border border-green-200"><CheckCircle size={10}/> Replied by {comment.agentName || 'Agent'}</span>}
                                         {comment.status === 'no_reply_needed' && <span className="flex items-center gap-1 text-[10px] text-gray-600 bg-gray-100 px-2.5 py-0.5 rounded-full font-bold border border-gray-200">Handled by {comment.agentName || 'Budi Kartika'}</span>}
                                         {comment.status === 'pending_review' && <span className="flex items-center gap-1 text-[10px] text-orange-700 bg-orange-50 px-2.5 py-0.5 rounded-full font-bold border border-orange-200"><Shield size={10}/> Pending Review</span>}
@@ -1084,10 +1292,10 @@ const App = () => {
                                         <ThumbsUp size={13} className={comment.isLiked ? "fill-blue-600" : ""}/> {comment.isLiked ? 'Liked' : 'Like'}
                                     </button>
                                     
-                                    {comment.status === 'unread' ? (
+                                    {isCommentUnread ? (
                                         <>
                                             <button onClick={() => setReplyingToId(comment.id)} className="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"><Reply size={13}/> Reply</button>
-                                            <button onClick={() => handleCommentAction(activeSession.id, comment.id, 'no_reply_needed')} className="text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1"><CheckCircle size={13}/> Mark as Handled</button>
+                                            <button onClick={() => handleCommentAction(activeSession.id, comment.id, 'no_reply_needed')} className="text-gray-600 hover:bg-gray-100 px-2 py-1 rounded transition-colors flex items-center gap-1 -ml-2"><CheckCircle size={13}/> Mark as Handled</button>
                                         </>
                                     ) : (
                                         <>
@@ -1099,7 +1307,6 @@ const App = () => {
                                     <div className="flex items-center gap-3 ml-auto text-gray-400 border-l border-gray-200 pl-3">
                                         <button onClick={() => handleCommentAction(activeSession.id, comment.id, 'hide')} className="hover:text-gray-700 transition-colors flex items-center gap-1" title="Hide Comment"><EyeOff size={13}/> Hide</button>
                                         <button onClick={() => handleCommentAction(activeSession.id, comment.id, 'block')} className="hover:text-red-600 transition-colors flex items-center gap-1" title="Block User"><Ban size={13}/> Block</button>
-                                        <button className="hover:text-indigo-600 transition-colors flex items-center gap-1" title="Create CRM Ticket"><Ticket size={13}/> Create Ticket</button>
                                         <button onClick={() => handleCommentAction(activeSession.id, comment.id, 'pending_review')} className="hover:text-orange-600 transition-colors flex items-center gap-1" title="Record Service Upgrade / TL Review"><FileEdit size={13}/> Record Escalation</button>
                                     </div>
                                 </div>
@@ -1108,24 +1315,71 @@ const App = () => {
                                 {renderInlineComposer(comment.id)}
 
                                 {/* Threaded Replies */}
-                                {comment.replies?.map((reply, rIdx) => (
+                                {comment.replies?.map((reply, rIdx) => {
+                                  const isReplyUnread = reply.status === 'unread';
+                                  return (
                                     <div key={rIdx} className="flex items-start mt-4 ml-8 relative before:absolute before:-left-5 before:top-4 before:w-4 before:border-t-2 before:border-gray-200 before:rounded-bl">
-                                      <img src={reply.sender === 'agent' ? "https://placehold.co/100x100/333/fff?text=Ag" : comment.avatar} className="w-7 h-7 rounded-full mr-3 object-cover shadow-sm ring-2 ring-white" alt={reply.sender} />
+                                      <img src={reply.sender === 'agent' ? "https://placehold.co/100x100/333/fff?text=Ag" : reply.avatar || comment.avatar} className="w-7 h-7 rounded-full mr-3 object-cover shadow-sm ring-2 ring-white" alt={reply.sender} />
                                       <div className="flex-1">
-                                          <div className={`border rounded-2xl rounded-tl-none px-4 py-2.5 inline-block ${reply.sender === 'agent' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-gray-100'}`}>
-                                              <span className={`font-bold text-xs block mb-1 flex items-center gap-1 ${reply.sender === 'agent' ? 'text-[#005CAB]' : 'text-gray-900'}`}>
-                                                  {reply.sender === 'agent' ? <><User size={10}/> Your Brand</> : comment.name}
-                                              </span>
-                                              <p className="text-sm text-gray-800 whitespace-pre-wrap">{reply.text}</p>
+                                          <div className={`rounded-xl transition-colors ${isReplyUnread ? 'bg-blue-50/40 ring-1 ring-blue-200 p-3 -m-3 shadow-sm' : ''}`}>
+                                              <div className="flex items-center justify-between mb-1">
+                                                <span className={`font-bold text-xs flex items-center gap-1 ${reply.sender === 'agent' ? 'text-[#005CAB]' : 'text-gray-900'}`}>
+                                                    {reply.sender === 'agent' ? <><User size={10}/> Your Brand</> : reply.name || comment.name}
+                                                </span>
+                                                {/* Sub-comment specific status */}
+                                                {reply.sender === 'customer' && (
+                                                    <div className="flex items-center cursor-pointer" onClick={() => !isReplyUnread && handleCommentAction(activeSession.id, reply.id, 'unread', true, comment.id)}>
+                                                        {isReplyUnread && <span className="flex items-center gap-1.5 text-[10px] text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full font-bold shadow-sm"><span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span> Unread</span>}
+                                                        {reply.status === 'replied' && <span className="flex items-center gap-1 text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-bold"><CheckCircle size={10}/> Handled</span>}
+                                                        {reply.status === 'no_reply_needed' && <span className="flex items-center gap-1 text-[10px] text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full font-bold">No Reply Needed</span>}
+                                                    </div>
+                                                )}
+                                              </div>
+                                              <div className={`border rounded-2xl rounded-tl-none px-4 py-2.5 inline-block ${reply.sender === 'agent' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-gray-100'}`}>
+                                                  <p className="text-sm text-gray-800 whitespace-pre-wrap">{reply.text}</p>
+                                              </div>
+                                              
+                                              {/* Sub-comment Action Bar (for customer replies) */}
+                                              {reply.sender === 'customer' && (
+                                                  <div className="flex flex-wrap items-center gap-3 mt-1.5 ml-2 text-[10px] font-semibold text-gray-500">
+                                                      <button onClick={() => handleCommentAction(activeSession.id, reply.id, 'toggle_like', true, comment.id)} className={`${reply.isLiked ? 'text-blue-600' : 'hover:text-blue-600'} transition-colors flex items-center gap-1`}>
+                                                        <ThumbsUp size={11} className={reply.isLiked ? "fill-blue-600" : ""}/> {reply.isLiked ? 'Liked' : 'Like'}
+                                                      </button>
+                                                      
+                                                      {isReplyUnread ? (
+                                                          <>
+                                                            <button onClick={() => setReplyingToId(reply.id)} className="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"><Reply size={11}/> Reply</button>
+                                                            <button onClick={() => handleCommentAction(activeSession.id, reply.id, 'no_reply_needed', true, comment.id)} className="hover:text-gray-700 transition-colors flex items-center gap-1"><CheckCircle size={11}/> Handled</button>
+                                                          </>
+                                                      ) : (
+                                                          <>
+                                                            <span className="font-normal">{reply.time}</span>
+                                                            <button onClick={() => setReplyingToId(reply.id)} className="hover:text-blue-600 transition-colors flex items-center gap-1"><Reply size={11}/> Reply</button>
+                                                          </>
+                                                      )}
+                                                      <div className="flex items-center gap-2 ml-auto border-l border-gray-200 pl-2">
+                                                          <button onClick={() => handleCommentAction(activeSession.id, reply.id, 'hide', true, comment.id)} className="hover:text-gray-700 transition-colors flex items-center gap-1" title="Hide"><EyeOff size={11}/> Hide</button>
+                                                          <button onClick={() => handleCommentAction(activeSession.id, reply.id, 'block', true, comment.id)} className="hover:text-red-600 transition-colors flex items-center gap-1" title="Block"><Ban size={11}/> Block</button>
+                                                      </div>
+                                                  </div>
+                                              )}
+                                              
+                                              {/* Sub-comment simple timestamp (for agent replies) */}
+                                              {reply.sender === 'agent' && (
+                                                  <div className="text-[10px] text-gray-400 mt-1 ml-2">{reply.time}</div>
+                                              )}
+                                              
+                                              {/* Inline Composer for Sub-comment */}
+                                              {renderInlineComposer(reply.id, true, comment.id)}
                                           </div>
-                                          <div className="text-[10px] text-gray-400 mt-1 ml-2">{reply.time}</div>
                                       </div>
                                     </div>
-                                ))}
+                                  );
+                                })}
                             </div>
                         </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
             </div>
@@ -1165,15 +1419,18 @@ const App = () => {
                     <MoreVertical size={16} className="text-gray-400 cursor-pointer ml-1" />
                 </div>
               </div>
-              <div className="flex-1 p-6 overflow-y-auto bg-white">
+              <div className="flex-1 p-6 overflow-y-auto bg-white custom-scrollbar">
                  {activeSession.history?.map((msg, idx) => {
                     if (msg.sender === 'customer') {
                         const stars = '★'.repeat(activeSession.rating || 5) + '☆'.repeat(5 - (activeSession.rating || 5));
                         return (
                             <div key={msg.id || idx} className="bg-yellow-50 p-5 rounded-lg border border-yellow-200 mb-6 shadow-sm">
-                                <div className="flex justify-between items-center mb-3 border-b border-yellow-200/50 pb-2">
-                                    <span className="font-bold text-sm text-gray-900">{activeSession.name}</span>
-                                    <span className="text-yellow-500 text-lg tracking-widest">{stars}</span>
+                                <div className="flex flex-col mb-3 border-b border-yellow-200/50 pb-3">
+                                    <h4 className="font-bold text-gray-900 text-base mb-1">{activeSession.reviewTitle}</h4>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-medium text-gray-600">{activeSession.name} <span className="text-gray-400 mx-1">—</span> {msg.time}</span>
+                                        <span className="text-yellow-500 text-lg tracking-widest">{stars}</span>
+                                    </div>
                                 </div>
                                 <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                                 
@@ -1182,10 +1439,8 @@ const App = () => {
                                     <button onClick={() => handleCommentAction(activeSession.id, msg.id, 'toggle_like')} className={`${msg.isLiked ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'} transition-colors flex items-center gap-1`}>
                                         <ThumbsUp size={13} className={msg.isLiked ? "fill-blue-600" : ""}/> {msg.isLiked ? 'Helpful' : 'Helpful?'}
                                     </button>
-                                    <span className="text-gray-400 font-normal">{msg.time}</span>
                                     
                                     <div className="flex items-center gap-3 ml-auto text-gray-400 border-l border-yellow-200 pl-3">
-                                        <button className="hover:text-indigo-600 transition-colors flex items-center gap-1" title="Create CRM Ticket"><Ticket size={13}/> Create Ticket</button>
                                         <button onClick={() => handleCommentAction(activeSession.id, msg.id, 'pending_review')} className="hover:text-orange-600 transition-colors flex items-center gap-1" title="Record Escalation"><FileEdit size={13}/> Record Escalation</button>
                                     </div>
                                 </div>
@@ -1215,7 +1470,7 @@ const App = () => {
                     rows="2"
                   ></textarea>
                   <div className="flex justify-end items-center">
-                    <button className="px-8 py-2 bg-gray-800 text-white text-xs font-bold rounded-lg shadow-md hover:bg-black flex items-center space-x-2 transition-colors">
+                    <button className="px-8 py-2 bg-[#005CAB] text-white text-xs font-bold rounded-lg shadow-md hover:bg-blue-700 flex items-center space-x-2 transition-colors">
                       <Send size={14} />
                       <span>Publish Reply</span>
                     </button>
@@ -1226,7 +1481,7 @@ const App = () => {
         </main>
 
         {/* 5. Right Panel: Assistant & Connection */}
-        <aside className="w-[380px] bg-[#F8FAFC] flex flex-col shadow-inner justify-between border-l border-gray-200 flex-shrink-0 z-10 relative">
+        <aside className="w-[570px] bg-[#F8FAFC] flex flex-col shadow-inner justify-between border-l border-gray-200 flex-shrink-0 z-10 relative">
           <div className="flex flex-col h-full bg-white overflow-hidden">
             {/* Tabs for Right Side */}
             <div className="flex bg-gray-100 border-b border-gray-200 flex-shrink-0">
